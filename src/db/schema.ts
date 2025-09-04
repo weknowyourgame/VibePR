@@ -42,7 +42,7 @@ export interface GeneratePhase extends ReviewPhase {
     prChangesSummary?: string;
     generatedTests?: TestCase[];
     autoSetupInstructions?: string;
-    capyYamlContent?: string;
+    yamlContent?: string;
   }
 
 export interface TestCase {

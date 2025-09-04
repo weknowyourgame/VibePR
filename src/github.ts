@@ -1,7 +1,7 @@
 import { createAppAuth } from '@octokit/auth-app';
 import { Octokit } from '@octokit/rest';
 import crypto from 'crypto';
-import config from './config';
+import config from './config/config';
 
 const auth = createAppAuth({
     appId: config.github.appId,
