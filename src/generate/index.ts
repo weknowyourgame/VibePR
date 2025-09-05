@@ -210,43 +210,43 @@ export async function generateTasks(repo: z.infer<typeof Repo>, pr: z.infer<type
             };
 
             return `
-### ${i + 1}: ${test.name} ${priorityIcons[test.priority] || ''}
+            ### ${i + 1}: ${test.name} ${priorityIcons[test.priority] || ''}
 
-**Description**: ${test.description}
+            **Description**: ${test.description}
 
-**Prerequisites**:
-${test.prerequisites.map((prereq: string) => `- ${prereq}`).join('\n')}
+            **Prerequisites**:
+            ${test.prerequisites.map((prereq: string) => `- ${prereq}`).join('\n')}
 
-**Steps**:
-${test.steps.map((step: string, idx: number) => `${idx + 1}. ${step}`).join('\n')}
+            **Steps**:
+            ${test.steps.map((step: string, idx: number) => `${idx + 1}. ${step}`).join('\n')}
 
-**Expected Result**: ${test.expectedResult}
-`;
-        });
+            **Expected Result**: ${test.expectedResult}
+            `;
+                    });
 
-        const comment = `# VibePR Review
-- PR: #${pr.number}
-- Commit: ${pr.head.sha.slice(0, 7)}
+                    const comment = `# VibePR Review
+            - PR: #${pr.number}
+            - Commit: ${pr.head.sha.slice(0, 7)}
 
-## Codebase Summary
-${response.codebaseSummary}
+            ## Codebase Summary
+            ${response.codebaseSummary}
 
-## PR Changes
-${response.prChanges}
+            ## PR Changes
+            ${response.prChanges}
 
-## Setup Instructions
-${vibePrConfig ? "Fetched from vibePR.yaml" : response.setupInstructions || 'No setup instructions provided.'}
+            ## Setup Instructions
+            ${vibePrConfig ? "Fetched from vibePR.yaml" : response.setupInstructions || 'No setup instructions provided.'}
 
-## Generated Test Cases
-${testDetails.join('')}
+            ## Generated Test Cases
+            ${testDetails.join('')}
 
-<details>
-<summary>Raw Changes Analyzed</summary>
+            <details>
+            <summary>Raw Changes Analyzed</summary>
 
-\`\`\`diff
-${fileChangesStr}
-\`\`\`
-</details>`;
+            \`\`\`diff
+            ${fileChangesStr}
+            \`\`\`
+            </details>`;
 
         if (summaryCommentId) {
             await editPrComment(
@@ -257,35 +257,28 @@ ${fileChangesStr}
                 comment
             );
         }
-
         return response;
 
     } catch (error) {
         const errorComment = `❌ Error while analyzing PR and generating tests:
 
-\`\`\`
-${error}
-\`\`\`
-`;
+        \`\`\`
+        ${error}
+        \`\`\`
+        `;
         if (summaryCommentId) {
-            await editPrComment(
-                octokit,
-                repo.owner,
-                repo.name,
-                summaryCommentId,
-                errorComment
-            );
-        }
-        if (review) {
+            await editPrComment(octokit, repo.owner, repo.name, summaryCommentId, errorComment);
+          }
+          if (review) {
             if (review.generate) {
                 // review.generate.status = "failed";
                 // review.generate.error = String(error);
             }
-            review.status = "failed";
-            // Uncomment when this function is available
+            if (review.status === "pending") {
+                review.status = "failed";
+            }
             // await upsertReview(review);
+          }
+          return null;
         }
-        console.error(error);
-        throw new Error(`Failed to generate tasks: ${error}`);
-    }
-}
+      }
