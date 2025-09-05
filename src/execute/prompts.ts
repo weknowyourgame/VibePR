@@ -4,7 +4,7 @@ import { z } from 'zod';
 export function autoSetupSystemPrompt(gr:  z.infer<typeof GenerateResponse>): string {
   return `You are an expert at setting up and configuring development environments.
 
-<CODEBASE_SUMMARY>${gr.codebase_summary}</CODEBASE_SUMMARY>
+<CODEBASE_SUMMARY>${gr.codebaseSummary}</CODEBASE_SUMMARY>
 
 <SYSTEM_CAPABILITIES>
 * You have access to an Ubuntu virtual machine with internet connectivity
@@ -39,25 +39,25 @@ Your task is to set up a testing environment by:
 }
 
 export function autoSetupUserPrompt(
-  setup_instructions: string,
+  setupInstructions: string,
   variables: Record<string, string>,
-  repo_path: string
+  repoPath: string
 ): string {
   const variable_lines = Object.keys(variables).map(key => `- ${key}: ${variables[key]}`);
   return `Here are the setup instructions:
 
-${setup_instructions}
+${setupInstructions}
 
 Available variables that have been set in the environment:
 ${variable_lines.join('\n')}
 
-Please follow these instructions to set up the test environment in ${repo_path}. The variables are already available in the environment, but you may need to create a .env file if the application requires it.`;
+Please follow these instructions to set up the test environment in ${repoPath}. The variables are already available in the environment, but you may need to create a .env file if the application requires it.`;
 }
 
 export function instructionSetupSystemPrompt(gr: z.infer<typeof GenerateResponse>): string {
   return `You are an expert at setting up and configuring development environments.
 
-<CODEBASE_SUMMARY>${gr.codebase_summary}</CODEBASE_SUMMARY>
+<CODEBASE_SUMMARY>${gr.codebaseSummary}</CODEBASE_SUMMARY>
 
 <SYSTEM_CAPABILITIES>
 * You have access to an Ubuntu virtual machine with internet connectivity
@@ -83,7 +83,7 @@ Assume that the environment is already set up from previous steps and you are ju
 export function executeTestSystemPrompt(gr: z.infer<typeof GenerateResponse>): string {
   return `You are an expert at executing UI tests.
 
-<CODEBASE_SUMMARY>${gr.codebase_summary}</CODEBASE_SUMMARY>
+<CODEBASE_SUMMARY>${gr.codebaseSummary}</CODEBASE_SUMMARY>
 
 <SYSTEM_CAPABILITIES>
 * You have access to an Ubuntu virtual machine with internet connectivity
@@ -111,17 +111,17 @@ Try your best to execute the test and return the test result, error message if i
 }
 
 export function executeTestUserPrompt(
-  test_name: string,
-  test_description: string,
+  testName: string,
+  testDescription: string,
   prerequisites: string[],
   steps: string[],
-  expected_result: string,
+  expectedResult: string,
   priority: string,
 ): string {
   return `Please execute the following test:
 
-Test Name: ${test_name}
-Description: ${test_description}
+Test Name: ${testName}
+Description: ${testDescription}
 
 Prerequisites:
 ${prerequisites.map(prereq => `- ${prereq}`).join('\n')}
@@ -130,7 +130,7 @@ Steps to Execute:
 ${steps.map((step, i) => `${i + 1}. ${step}`).join('\n')}
 
 Expected Result:
-${expected_result}
+${expectedResult}
 
 Priority: ${priority}
 

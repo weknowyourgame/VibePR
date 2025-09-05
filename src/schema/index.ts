@@ -1,32 +1,32 @@
 import { z } from "zod";
 
 export const ToolCall = z.object({
-  tool_name: z.string(),
+  toolName: z.string(),
   args: z.any(),
 });
 
 export const TimestampedStep = z.object({
   text: z.string(),
   timestamp: z.string(),
-  tool_calls: ToolCall.array().optional(),
+  toolCalls: ToolCall.array().optional(),
   screenshot: z.string().optional(),
   action: z.string().optional(),
   type: z.string().optional(),
-  screenshot_url: z.string().optional()
+  screenshotUrl: z.string().optional()
 });
 
 export const AutoSetupInterface = z.object({
-    setup_instructions: z.string(),
+    setupInstructions: z.string(),
     variables: z.record(z.string(), z.string()),
-    repo_path: z.string()
+    repoPath: z.string()
 });
 
 export const ExecuteTestInterface = z.object({
-    test_name: z.string(),
-    test_description: z.string(),
+    testName: z.string(),
+    testDescription: z.string(),
     prerequisites: z.array(z.string()),
     steps: z.array(z.string()),
-    expected_result: z.string(),
+    expectedResult: z.string(),
     priority: z.string()
 });
 
@@ -35,15 +35,15 @@ export const TestCase = z.object({
   description: z.string(),
   prerequisites: z.array(z.string()),
   steps: z.array(z.string()),
-  expected_result: z.string(),
+  expectedResult: z.string(),
   priority: z.string()
 });
 
 export const GenerateResponse = z.object({
-    codebase_summary: z.string(),
-    pr_changes: z.string(),
+    codebaseSummary: z.string(),
+    prChanges: z.string(),
     tests: TestCase.array(),
-    setup_instructions: z.string().optional()
+    setupInstructions: z.string().optional()
 });
 
 
@@ -57,8 +57,8 @@ export const FileAnalysisResponse = z.object({
 });
 
 export const TestResult = z.object({
-  test_number: z.number(),
-  test_name: z.string(),
+  testNumber: z.number(),
+  testName: z.string(),
   steps: TimestampedStep.array().optional(),
   success: z.boolean(),
   error: z.string().optional(),
@@ -66,8 +66,8 @@ export const TestResult = z.object({
 });
 
 export const SetupSchema = z.object({
-  setup_success: z.boolean(),
-  setup_error: z.string().optional()
+  setupSuccess: z.boolean(),
+  setupError: z.string().optional()
 });
 
 export const VibePRStep = z.object({
@@ -83,17 +83,17 @@ export const VibePRConfig = z.object({
 
 export const ReviewPhase = z.object({
   status: z.enum(["pending", "in_progress", "complete", "failed"]),
-  started_at: z.string().optional(),
-  completed_at: z.string().optional(),
+  startedAt: z.string().optional(),
+  completedAt: z.string().optional(),
   error: z.string().optional()
 });
 
 export const GeneratePhase = z.object({
-  codebase_summary: z.string().optional(),
-  pr_changes_summary: z.string().optional(),
-  generated_tests: TestCase.array().optional(),
-  auto_setup_instructions: z.string().optional(),
-  vibePR_yaml_content: z.string().optional()
+  codebaseSummary: z.string().optional(),
+  prChangesSummary: z.string().optional(),
+  generatedTests: TestCase.array().optional(),
+  autoSetupInstructions: z.string().optional(),
+  vibePRYamlContent: z.string().optional()
 });
 
 export const SetupPhase = z.object({
@@ -201,7 +201,7 @@ export const Review = z.object({
   instanceId: z.string().optional(),
   startedAt: z.string(),
   completedAt: z.string().optional(),
-  status: z.enum(["pending", "in_progress", "complete", "failed"]),
+  status: z.enum(["pending", "inProgress", "complete", "failed"]),
   totalTests: z.number().optional(),
   passedTests: z.number().optional(),
   generate: GeneratePhase.optional(),

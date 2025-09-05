@@ -9,10 +9,10 @@ export async function callGatewayAI(input: z.infer<typeof ReqSchema>) {
         const requestType = input.type;
         
         // Get the model id
-        const modelId = input.model_id;
+        const modelId = input.modelId;
 
         // Combine system prompt and user prompt
-        const systemPrompt = input.system_prompt || "";
+        const systemPrompt = input.systemPrompt || "";
         const combinedPrompt = `${systemPrompt}\n\nUser Request: ${input.prompt}`;
     
         let response;

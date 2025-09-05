@@ -146,7 +146,7 @@ export async function generateTasks(repo: z.infer<typeof Repo>, pr: z.infer<type
                 vibePrConfig = VibePRConfig.parse(parsedYaml);
                 
                 if (review && review.generate) {
-                    review.generate.vibePR_yaml_content = ymlContent;
+                    review.generate.vibePRYamlContent = ymlContent;
                 }
             }
         } catch (error) {
@@ -184,10 +184,10 @@ export async function generateTasks(repo: z.infer<typeof Repo>, pr: z.infer<type
 
         // Update review if we have one
         if (review && review.generate) {
-            review.generate.codebase_summary = response.codebase_summary;
-            review.generate.pr_changes_summary = response.pr_changes;
-            review.generate.auto_setup_instructions = response.setup_instructions;
-            review.generate.generated_tests = response.tests;
+            review.generate.codebaseSummary = response.codebaseSummary;
+            review.generate.prChangesSummary = response.prChanges;
+            review.generate.autoSetupInstructions = response.setupInstructions;
+            review.generate.generatedTests = response.tests;
             
             // These fields should be added to the schema if needed
             // review.generate.status = "complete";
@@ -220,7 +220,7 @@ ${test.prerequisites.map((prereq: string) => `- ${prereq}`).join('\n')}
 **Steps**:
 ${test.steps.map((step: string, idx: number) => `${idx + 1}. ${step}`).join('\n')}
 
-**Expected Result**: ${test.expected_result}
+**Expected Result**: ${test.expectedResult}
 `;
         });
 
@@ -229,13 +229,13 @@ ${test.steps.map((step: string, idx: number) => `${idx + 1}. ${step}`).join('\n'
 - Commit: ${pr.head.sha.slice(0, 7)}
 
 ## Codebase Summary
-${response.codebase_summary}
+${response.codebaseSummary}
 
 ## PR Changes
-${response.pr_changes}
+${response.prChanges}
 
 ## Setup Instructions
-${vibePrConfig ? "Fetched from vibePR.yaml" : response.setup_instructions || 'No setup instructions provided.'}
+${vibePrConfig ? "Fetched from vibePR.yaml" : response.setupInstructions || 'No setup instructions provided.'}
 
 ## Generated Test Cases
 ${testDetails.join('')}
