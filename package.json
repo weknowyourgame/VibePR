@@ -4,17 +4,23 @@
   "type": "module",
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/js-yaml": "^4.0.9",
     "drizzle-kit": "^0.31.4"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.18.0",
     "@octokit/auth-app": "^8.1.0",
     "@octokit/rest": "^22.0.0",
     "@supabase/supabase-js": "^2.57.0",
+    "axios": "^1.6.7",
+    "dotenv": "^16.4.5",
     "drizzle-orm": "^0.44.5",
     "fastify": "^5.5.0",
+    "js-yaml": "^4.1.0",
+    "openai": "^4.28.4",
     "postgres": "^3.4.7",
     "zod": "^4.1.5"
   }

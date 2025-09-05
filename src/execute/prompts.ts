@@ -1,8 +1,8 @@
-import { type AutoSetupInterface, type ExecuteTestInterface, type GenerateResponse, type TestCase } from "../config/interface";
+import { GenerateResponse } from '../schema';
+import { z } from 'zod';
 
-
-export const auto_setup_system_prompt = (gr: GenerateResponse): string => `
-You are an expert at setting up and configuring development environments.
+export function autoSetupSystemPrompt(gr:  z.infer<typeof GenerateResponse>): string {
+  return `You are an expert at setting up and configuring development environments.
 
 <CODEBASE_SUMMARY>${gr.codebase_summary}</CODEBASE_SUMMARY>
 
@@ -35,30 +35,53 @@ Your task is to set up a testing environment by:
 7. Verifying the environment is ready for testing, wait for the browser and application to load (can take some time)
 8. If it is successful, return setup_success: true
 9. If it is unsuccessful, return setup_success: false and setup_error: error message
-</TASK>
-`;
+</TASK>`;
+}
 
-export const auto_setup_user_prompt = (data: AutoSetupInterface): string => {
-  const { setup_instructions, variables, repo_path } = data;
+export function autoSetupUserPrompt(
+  setup_instructions: string,
+  variables: Record<string, string>,
+  repo_path: string
+): string {
+  const variable_lines = Object.keys(variables).map(key => `- ${key}: ${variables[key]}`);
+  return `Here are the setup instructions:
 
-  const varsList = Object.keys(variables)
-    .map(key => `- ${key}: ${variables[key]}`)
-    .join("\n");
-
-  return `
-Here are the setup instructions:
-
-${setup_instructions ?? "No setup instructions provided."}
+${setup_instructions}
 
 Available variables that have been set in the environment:
-${varsList}
+${variable_lines.join('\n')}
 
-Please follow these instructions to set up the test environment in ${repo_path}. The variables are already available in the environment, but you may need to create a .env file if the application requires it.
-`;
-};
+Please follow these instructions to set up the test environment in ${repo_path}. The variables are already available in the environment, but you may need to create a .env file if the application requires it.`;
+}
 
-export const execute_test_system_prompt = (gr: GenerateResponse): string => `
-You are an expert at executing UI tests.
+export function instructionSetupSystemPrompt(gr: z.infer<typeof GenerateResponse>): string {
+  return `You are an expert at setting up and configuring development environments.
+
+<CODEBASE_SUMMARY>${gr.codebase_summary}</CODEBASE_SUMMARY>
+
+<SYSTEM_CAPABILITIES>
+* You have access to an Ubuntu virtual machine with internet connectivity
+* Start Chromium (default browser) with the application menu
+* Install dependencies using bash with sudo privileges
+* You can log in with user credentials if provided for testing purposes
+* Opening applications may take some time, be patient and wait for them to load
+</SYSTEM_CAPABILITIES>
+
+<TASK>
+Your task is to execute a single setup instruction:
+1. Read and understand the provided instruction
+2. Execute the instruction using available tools
+3. Verify the instruction was completed successfully
+  - If necessary, take multiple turns to wait for the instruction to complete
+  - If a process takes a while, it is not a failure, just wait for it to complete
+4. If successful, return setup_success: true
+5. If unsuccessful, return setup_success: false and setup_error: error message
+Assume that the environment is already set up from previous steps and you are just executing a single instruction.
+</TASK>`;
+}
+
+export function executeTestSystemPrompt(gr: z.infer<typeof GenerateResponse>): string {
+  return `You are an expert at executing UI tests.
 
 <CODEBASE_SUMMARY>${gr.codebase_summary}</CODEBASE_SUMMARY>
 
@@ -84,32 +107,33 @@ Try your best to execute the test and return the test result, error message if i
 * Execute the test thoroughly and run it several times to ensure the functionality is working
   - For example, if testing message autoscrolling, send multiple messages to the chat to ensure the messages overflow and the autoscroll is working
   - For example, if testing adding and deleting items, add and delete multiple items in different orders to ensure items are being added and deleted in the correct order
-</IMPORTANT>
-`;
+</IMPORTANT>`;
+}
 
-export const execute_test_user_prompt = (data: ExecuteTestInterface): string => {
-  const { test_name, test_description, prerequisites, steps, expected_result, priority } = data;
-
-  const prereqList = prerequisites.map(p => `- ${p}`).join("\n");
-  const stepsList = steps.map((s, i) => `${i + 1}. ${s}`).join("\n");
-
-  return `
-Please execute the following test:
+export function executeTestUserPrompt(
+  test_name: string,
+  test_description: string,
+  prerequisites: string[],
+  steps: string[],
+  expected_result: string,
+  priority: string,
+): string {
+  return `Please execute the following test:
 
 Test Name: ${test_name}
 Description: ${test_description}
 
 Prerequisites:
-${prereqList}
+${prerequisites.map(prereq => `- ${prereq}`).join('\n')}
 
 Steps to Execute:
-${stepsList}
+${steps.map((step, i) => `${i + 1}. ${step}`).join('\n')}
 
 Expected Result:
 ${expected_result}
 
 Priority: ${priority}
 
-Please follow these steps exactly, take screenshots at key moments, and verify the results carefully.
-`;
-};
+Please follow these steps exactly, take screenshots at key moments, and verify the results carefully.`;
+}
+

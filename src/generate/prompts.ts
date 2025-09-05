@@ -1,3 +1,5 @@
+import { VibePRConfig } from "../schema";
+
 export const ANALYZE_FILES_SYSTEM_PROMPT= `You are an expert code analyst focused on identifying the most important files in a repository for understanding its core functionality and testing needs.
 
 Your task is to analyze a file tree and identify the most critical files that would be essential for:
@@ -22,18 +24,18 @@ Return a structured response with a list of important files (max 10)`;
 
 export const SUMMARIZE_FILE_SYSTEM_PROMPT = `You are an expert code analyst. Provide a concise 2 sentence summary of this file's purpose and key functionality.`;
 
-export const analyze_files_user_prompt = `
+export const analyze_files_user_prompt = (file_tree: string) => `
 Generate prompt for file tree analysis.
 Please analyze this repository's file tree and identify the most important files for understanding and testing the codebase:
 
-{file_tree}
+${file_tree}
 `;
 
-export const summarize_files_user_prompt = `
+export const summarize_files_user_prompt = (file_content: string) => `
 Generate prompt for file summary.
 Please summarize this file's purpose and key functionality:
 
-{file_content}`;
+${file_content}`;
 
 export const GENERATE_TESTS_SYSTEM_PROMPT = `You are an expert QA engineer specializing in end-to-end UI testing. Your role is to:
 
@@ -67,28 +69,47 @@ For each test case:
 - Mark how important the test is
 `;
 
-export const generate_tests_user_prompt = `
-Generate prompt for test generation.
-Generate test cases for this pull request, focusing on the user-facing changes and their impact on the application.
-
-Note: The repository has a vibePR.yaml file that handles the following setup steps:
-{yaml.dump(vibePR_config.model_dump() if vibePR_config else {}, default_flow_style=False)}
-DO NOT generate test cases for any of these setup steps as they are already handled by the system.''' if vibePR_config else '''
-
-Note: Since there is no vibePR.yaml file in the repository, you will need to generate setup instructions for the test environment.'''}
-
-Pull Request Context:
-Title: {pr_title}
-Description: {pr_description}
-
-Repository Overview:
-{readme_content}
-
-Important Files:
-{codebase_context}
-
-File Tree:
-{file_tree}
-
-Changes to Test:
-{file_changes}`;
+export const generate_tests_user_prompt = (
+   pr_title: string, 
+   pr_description: string, 
+   file_changes: string, 
+   readme_content: string, 
+   file_tree: string, 
+   vibePR_config: string,
+   codebase_context: string
+ ) => {
+    let parsedVibePRConfig;
+    try {
+      parsedVibePRConfig = vibePR_config ? JSON.parse(vibePR_config) : null;
+    } catch (e) {
+      console.error('Error parsing vibePR_config:', e);
+      parsedVibePRConfig = null;
+    }
+   
+   const configSection = parsedVibePRConfig 
+     ? `Note: The repository has a vibePR.yaml file that handles the following setup steps:
+ ${JSON.stringify(parsedVibePRConfig, null, 2)}
+ DO NOT generate test cases for any of these setup steps as they are already handled by the system.`
+     : `Note: Since there is no vibePR.yaml file in the repository, you will need to generate setup instructions for the test environment.`;
+ 
+   return `Generate prompt for test generation.
+ Generate test cases for this pull request, focusing on the user-facing changes and their impact on the application.
+ 
+ ${configSection}
+ 
+ Pull Request Context:
+ Title: ${pr_title}
+ Description: ${pr_description}
+ 
+ Repository Overview:
+ ${readme_content}
+ 
+ Important Files:
+ ${codebase_context}
+ 
+ File Tree:
+ ${file_tree}
+ 
+ Changes to Test:
+ ${file_changes}`;
+ };

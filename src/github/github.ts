@@ -1,19 +1,18 @@
 import { createAppAuth } from '@octokit/auth-app';
 import { Octokit } from '@octokit/rest';
 import crypto from 'crypto';
-import config from './config/config';
 
 const auth = createAppAuth({
-    appId: config.github.appId,
-    privateKey: config.github.privateKey,
+    appId: process.env.GITHUB_APP_ID!,
+    privateKey: process.env.GITHUB_PRIVATE_KEY!,
   });
   
 export function createOctokit(installationId?: number) {
     return new Octokit({
         authStrategy: createAppAuth,
         auth: {
-        appId: config.github.appId,
-        privateKey: config.github.privateKey,
+        appId: process.env.GITHUB_APP_ID,
+        privateKey: process.env.GITHUB_PRIVATE_KEY,
         installationId,
         },
     });
@@ -21,8 +20,8 @@ export function createOctokit(installationId?: number) {
   
 export function getGithubIntegration() {
     return {
-      appId: config.github.appId,
-      privateKey: config.github.privateKey,
+      appId: process.env.GITHUB_APP_ID,
+      privateKey: process.env.GITHUB_PRIVATE_KEY,
       auth,
     };
 }
@@ -44,7 +43,7 @@ export async function getInstallation(installationId: number) {
   }
   
 export function verifyGithubWebhook(signature: string, payload: string): boolean {
-    const hmac = crypto.createHmac('sha256', config.github.webhookSecret);
+    const hmac = crypto.createHmac('sha256', process.env.GITHUB_WEBHOOK_SECRET!);
     hmac.update(payload, 'utf8');
     const expectedSignature = `sha256=${hmac.digest('hex')}`;
   
@@ -181,14 +180,12 @@ export async function getFileContent(
     owner: string,
     repo: string,
     path: string,
-    ref?: string
   ): Promise<string | null> {
     try {
       const { data: file } = await octokit.repos.getContent({
         owner,
         repo,
         path,
-        ref,
       });
   
       if ('content' in file && file.encoding === 'base64') {
